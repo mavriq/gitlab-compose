@@ -1,0 +1,15 @@
+#
+.idea
+.DS_Store
+.project
+.pydevproject
+*.un~
+*~
+*.swp
+.\#*
+\#*
+#
+/.env
+/.envdir/
+/local/
+/gitlab/

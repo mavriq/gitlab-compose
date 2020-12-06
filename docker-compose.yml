@@ -1,0 +1,54 @@
+version: '2.4'
+
+volumes:
+  gitlab-config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/local/gitlab/config
+  gitlab-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/local/gitlab/data
+  gitlab-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/local/gitlab/logs
+  gitlab-envdir:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/local/.envdir
+
+services:
+  gitlab:
+    container_name: gitlab
+    extends:
+      file: .compose/.lxcfs_mountpoints.yml
+      service: ${LXCFS_MOUNTPOINTS:-disabled}
+    build:
+      context: .
+      dockerfile: gitlab.Dockerfile
+      args:
+        IMAGE_GITLAB: gitlab/gitlab-ce:${GITLAB_VERSION}
+    image: local_gitlab:${GITLAB_VERSION}
+    restart: unless-stopped
+    volumes:
+    - gitlab-envdir:/envdir
+    - gitlab-config:/etc/gitlab
+    - gitlab-data:/var/opt/gitlab
+    - gitlab-logs:/var/log/gitlab
+    ports:
+    - "22:22/tcp"
+    environment:
+      GITLAB_SSH_PORT: 0.0.0.0:22
+      VIRTUAL_HOST: ${VIRTUAL_HOST}
+      VIRTUAL_PORT: "${VIRTUAL_PORT:-443}"
+      VIRTUAL_PROTO: "${VIRTUAL_PROTO:-https}"
+      LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
